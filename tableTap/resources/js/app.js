@@ -5,7 +5,7 @@ import MainLayout from '@/Layouts/MainLayout.vue'
 createInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
-    const page =  await pages[`./Pages/${name}.vue`]()
+    const page =  await pages[`./Pages/${name}.vue`]
     page.default.layout = page.default.layout || MainLayout
 
     return page
