@@ -20,4 +20,11 @@ class Shop extends Model
         return $this->belongsToMany(Kitchen::class, 'shop_kitchen');
     }
 
+    public function tables()
+    {
+        return $this->belongsToMany(Table::class, 'shop_table_association')
+                    ->withTimestamps();
+    }
+
+
 }
