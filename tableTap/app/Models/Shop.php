@@ -26,5 +26,9 @@ class Shop extends Model
                     ->withTimestamps();
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'shop_product');
+    }
 
 }

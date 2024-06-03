@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('brand');
             $table->string('address');
             $table->boolean('status')->default(true);  // Example field
-            $table->integer('phone_number');
+            $table->bigInteger('phone_number');
             $table->Integer('tk');
             $table->string('city');
             $table->string('region');
