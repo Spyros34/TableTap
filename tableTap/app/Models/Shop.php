@@ -15,5 +15,9 @@ class Shop extends Model
         return $this->belongsToMany(Owner::class, 'owner_shop');
     }
 
+    public function kitchens()
+    {
+        return $this->belongsToMany(Kitchen::class, 'shop_kitchen');
+    }
 
 }
