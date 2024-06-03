@@ -10,11 +10,16 @@ class Table extends Model
         'table_num',
         'qr_code',
     ];
-    
+
     public function shop()
     {
         return $this->belongsToMany(Shop::class, 'shop_table_association')
                     ->withTimestamps();
+    }
+
+    public function customer()
+    {
+        return $this->hasOne(Customer::class, 'customer_table');
     }
     
 }
