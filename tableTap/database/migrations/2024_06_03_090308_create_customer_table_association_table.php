@@ -12,8 +12,6 @@ class CreateCustomerTableAssociationTable extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade')->unique();
             $table->foreignId('table_id')->constrained('tables')->onDelete('cascade')->unique();
-            $table->unique('customer_id');
-            $table->unique('table_id');
             $table->timestamps();
         });
     }

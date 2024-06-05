@@ -19,7 +19,11 @@ class Table extends Model
 
     public function customer()
     {
-        return $this->hasOne(Customer::class, 'customer_table');
+        return $this->belongsToMany(Customer::class, 'customer_table')
+                    ->withPivot('customer_id', 'table_id')
+                    ->using(\Illuminate\Database\Eloquent\Relations\Pivot::class);
     }
+
+    
     
 }

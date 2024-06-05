@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Admin extends Model
 {
-    protected $fillable = ['name', 'email', 'password', 'active'];
+    use HasFactory;
 
-  
-   /**
-     * The system that this admin controls.
-     */
-    public function system() {
-        return $this->belongsTo(System::class, 'system_admin');
+    protected $fillable = [
+        'name', 'surname', 'username', 'email', 'password', 'remember_token'
+    ];
+
+    public function system()
+    {
+        return $this->belongsToMany(System::class, 'system_admin', 'admin_id', 'system_id')->withTimestamps();
     }
 }
+

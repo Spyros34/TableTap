@@ -9,13 +9,13 @@ class System extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['system_name', 'active'];
+    protected $fillable = [
+        'active'
+    ];
 
-   
-   /**
-     * The admins that control this system.
-     */
-    public function admins() {
-        return $this->belongsToMany(Admin::class, 'system_admin');
+    public function admin()
+    {
+        return $this->belongsToMany(Admin::class, 'system_admin', 'system_id', 'admin_id')->withTimestamps();
     }
 }
+

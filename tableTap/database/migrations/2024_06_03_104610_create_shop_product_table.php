@@ -11,8 +11,7 @@ class CreateShopProductTable extends Migration
         Schema::create('shop_product', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shop_id')->constrained('shops')->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
-            $table->unique('product_id'); // Ensure each product is only sold in one shop
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade')->unique(); // Ensure each product is sold in only one shop
             $table->timestamps();
         });
     }
@@ -22,3 +21,4 @@ class CreateShopProductTable extends Migration
         Schema::dropIfExists('shop_product');
     }
 }
+

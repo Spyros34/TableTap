@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('systems', function (Blueprint $table) {
             $table->id();
-            $table->string('system_name');  // Add more fields as required
             $table->boolean('active')->default(true);  // Example field
             $table->timestamps();
         });
