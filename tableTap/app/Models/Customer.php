@@ -12,4 +12,10 @@ class Customer extends Model
     {
         return $this->hasOne(Table::class, 'customer_table');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
 }

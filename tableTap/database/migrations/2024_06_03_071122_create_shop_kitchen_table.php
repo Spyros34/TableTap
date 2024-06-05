@@ -10,8 +10,8 @@ class CreateShopKitchenTable extends Migration
     {
         Schema::create('shop_kitchen', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shop_id')->constrained('shops')->onDelete('cascade');
-            $table->foreignId('kitchen_id')->constrained('kitchens')->onDelete('cascade')->unique(); // Ensures each kitchen is only linked to one shop
+            $table->foreignId('shop_id')->constrained()->onDelete('cascade');
+            $table->foreignId('kitchen_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
