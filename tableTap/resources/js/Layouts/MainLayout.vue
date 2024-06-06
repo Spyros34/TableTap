@@ -1,20 +1,22 @@
 <template>
-    <div>Show</div>
-    <Link href="/">Main Page</Link>&nbsp;
-    <Link href="/hello">Show Page</Link>
-    <div> The page with time {{ timer }}</div>
-    <slot>Default</slot>
+  <div class="flex">
+    <Sidebar />
+    <div class="flex-1 ml-64  bg-gray-100 min-h-screen">
+      <header class="bg-white shadow p-4 py-10 flex justify-between items-center">
+        <h1 class="text-2xl font-semibold">Owner</h1>
+        <div class="flex items-center">
+          <img class="h-10 w-10 rounded-full" src="https://via.placeholder.com/150" alt="Profile">
+          <span class="ml-3 text-lg">Jane S.</span>
+        </div>
+      </header>
+      <main class="mt-6">
+        <slot />
+      </main>
+    </div>
+  </div>
 </template>
-  
-  
+
+
 <script setup>
-import { ref } from 'vue'
-import { Link } from "@inertiajs/vue3";
-const timer = ref(0);
-
-// Corrected setInterval syntax
-setInterval(() => {
-    timer.value++;
-}, 1000);
+import Sidebar from './Sidebar.vue';
 </script>
-
