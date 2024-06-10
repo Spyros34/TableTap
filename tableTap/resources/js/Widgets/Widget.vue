@@ -1,5 +1,5 @@
 <template>
-  <div :class="[sizeClasses, maxWidthClasses]" class="bg-white p-4 rounded shadow mx-2">
+  <div :class="[sizeClasses, maxWidthClasses]" class="bg-white p-4 rounded-lg shadow mx-3 my-1 ">
     <h3 class="text-lg font-semibold mb-2 break-words">{{ title }}</h3>
     <div class="break-words">
       <slot />
