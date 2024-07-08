@@ -1,5 +1,5 @@
 <template>
-  <div :class="[sizeClasses, maxWidthClasses]" class="bg-white p-4 rounded-lg shadow mx-3 my-1 ">
+  <div :class="[maxWidthClasses]" class="bg-white p-4 rounded-lg shadow mx-3 my-1 ">
     <h3 class="text-lg font-semibold mb-2 break-words">{{ title }}</h3>
     <div class="break-words">
       <slot />
@@ -11,10 +11,6 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  size: {
-    type: String,
-    default: 'medium',
-  },
   title: {
     type: String,
     required: true,
@@ -25,16 +21,7 @@ const props = defineProps({
   },
 });
 
-const sizeClasses = computed(() => {
-  switch (props.size) {
-    case 'large':
-      return 'w-full';
-    case 'small':
-      return 'w-full';
-    default:
-      return 'w-full';
-  }
-});
+
 
 const maxWidthClasses = computed(() => {
   switch (props.maxWidth) {

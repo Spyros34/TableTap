@@ -1,7 +1,23 @@
 <template>
-    <div>
-      <h1 class="text-2xl font-bold">Kitchen</h1>
-      <p>Kitchen page content</p>
+    <div class="grid 2xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 mr-6 gap-5 ">
+      <Widget maxWidth="full" title="Staff">
+      <!-- Staff content goes here -->
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </Widget>
     </div>
-  </template>
+</template>
   
+
+
+<script setup>
+import Widget from '@/Widgets/Widget.vue';
+import { ref, onMounted  } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+
+
+onMounted(() => {
+  const { props } = usePage();
+  props.title = 'Kitchen';
+});
+</script>
+

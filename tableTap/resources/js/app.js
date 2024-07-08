@@ -3,10 +3,10 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
 createInertiaApp({
-  resolve: async (name) => {
+  resolve: name => {
     const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
-    const page = await pages[`./Pages/${name}.vue`];
-    page.default.layout = page.default.layout || MainLayout;
+    const page = pages[`./Pages/${name}.vue`].default;
+    page.layout = page.layout || MainLayout;
     return page;
   },
   setup({ el, App, props, plugin }) {
