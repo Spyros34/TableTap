@@ -19,32 +19,32 @@
 
   <div class="md:hidden fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 bg-white border border-gray2 rounded-full bottom-4 left-1/2">
     <div class="grid h-full max-w-lg grid-cols-7 mx-auto">
-      <Link href="/" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-slate dark:hover:bg-gray group">
-        <span class="material-icons text-gray2 dark:text-gray3 group-hover:text-blue-600 dark:group-hover:text-blue-500">dashboard</span>
+      <Link href="/" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">dashboard</span>
         <span class="sr-only">Dashboard</span>
       </Link>
-      <Link href="/kitchen" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate dark:hover:bg-gray group">
-        <span class="material-icons text-gray2 dark:text-gray group-hover:text-blue-600 dark:group-hover:text-blue-500">kitchen</span>
+      <Link href="/kitchen" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">kitchen</span>
         <span class="sr-only">Kitchen</span>
       </Link>
-      <Link href="/waiter" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate dark:hover:bg-slate group">
-        <span class="material-icons text-gray2 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">person</span>
+      <Link href="/waiter" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">person</span>
         <span class="sr-only">Waiter</span>
       </Link>
-      <Link href="/products" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate dark:hover:bg-slate group">
-        <span class="material-icons text-gray2 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">store</span>
+      <Link href="/products" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">store</span>
         <span class="sr-only">Products</span>
       </Link>
-      <Link href="/qrcode" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate dark:hover:bg-slate group">
-        <span class="material-icons text-gray2 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">qr_code</span>
+      <Link href="/qrcode" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">qr_code</span>
         <span class="sr-only">QR-code</span>
       </Link>
-      <Link href="/profile" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate dark:hover:bg-gray-800 group">
-        <span class="material-icons text-gray2 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">account_circle</span>
+      <Link href="/profile" class="inline-flex flex-col items-center justify-center px-5 hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">account_circle</span>
         <span class="sr-only">Profile</span>
       </Link>
-      <Link href="/settings" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-slate dark:hover:bg-gray-800 group">
-        <span class="material-icons text-gray2 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">settings</span>
+      <Link href="/settings" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-slate group">
+        <span class="material-icons text-gray2 group-hover:text-blue-600">settings</span>
         <span class="sr-only">Settings</span>
       </Link>
     </div>

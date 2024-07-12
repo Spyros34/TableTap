@@ -40,6 +40,20 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'owner' => [
+        'driver' => 'session',
+        'provider' => 'owners',
+        ],
+
+        'kitchen' => [
+            'driver' => 'session',
+            'provider' => 'kitchens',
+        ],
+
+        'waiter' => [
+            'driver' => 'session',
+            'provider' => 'waiters',
+        ],
     ],
 
     /*
@@ -63,6 +77,20 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Owner::class),
+        ],
+
+        'kitchens' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL',App\Models\Kitchen::class),
+        ],
+
+        'waiters' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL',App\Models\Waiter::class),
         ],
 
         // 'users' => [

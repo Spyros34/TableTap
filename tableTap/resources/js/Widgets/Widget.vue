@@ -1,5 +1,5 @@
 <template>
-  <div :class="[maxWidthClasses]" class="bg-white p-4 rounded-lg shadow mx-3 my-1 ">
+  <div :class="[maxWidthClasses, { 'text-center': align === 'center' }]" class="bg-white p-4 rounded-lg shadow mx-3 my-1 ">
     <h3 class="text-lg font-semibold mb-2 break-words">{{ title }}</h3>
     <div class="break-words">
       <slot />
@@ -18,6 +18,10 @@ const props = defineProps({
   maxWidth: {
     type: String,
     default: 'full', // can be 'full', 'half', or 'third'
+  },
+  align: {
+    type: String,
+    default: '', // can be 'center' or ''
   },
 });
 
