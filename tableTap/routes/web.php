@@ -1,4 +1,5 @@
 <?php
+
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ShopController;
 use App\Http\Middleware\EnsureUserIsAuthenticated;
 use App\Http\Middleware\RedirectIfAuthenticated;
 
@@ -55,4 +57,6 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::get('/qrcode', [QRCodeController::class, 'index'])->name('qrcode');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::get('/create-shop', [ShopController::class, 'create'])->name('create-shop');
+    Route::post('/create-shop', [ShopController::class, 'store']);
 });

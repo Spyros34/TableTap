@@ -8,17 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class EnsureUserIsAuthenticated
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next)
     {
         if (!Auth::check()) {
-            return redirect()->route('user-selection');
+            return redirect()->route('login');
         }
 
         return $next($request);

@@ -9,13 +9,21 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     public function loginOwner(Request $request)
-    {
-        $credentials = $request->only('username', 'password');
-        if (Auth::guard('owner')->attempt($credentials)) {
-            return redirect()->intended('/');
-        }
-        return back()->withErrors(['username' => 'Invalid credentials']);
+{
+    $credentials = $request->only('username', 'password');
+
+    // Log the credentials being attempted
+    logger()->info('Attempting login with credentials: ', $credentials);
+
+    if (Auth::guard('owner')->attempt($credentials)) {
+        return redirect()->intended('/dashboard');
     }
+
+    // Log a warning if login failed
+    logger()->warning('Login failed for username: ' . $credentials['username']);
+
+    return back()->withErrors(['username' => 'Invalid username or password']);
+}
 
     public function loginKitchen(Request $request)
     {

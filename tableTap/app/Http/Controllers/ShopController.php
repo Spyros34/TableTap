@@ -2,63 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shop;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ShopController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('CreateShop');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'storeName' => ['required', 'string', 'max:255'],
+            'storeType' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+            'region' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'postalCode' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20'],
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $shop = Shop::create([
+            'storeName' => $request->storeName,
+            'storeType' => $request->storeType,
+            'address' => $request->address,
+            'region' => $request->region,
+            'city' => $request->city,
+            'postalCode' => $request->postalCode,
+            'phone' => $request->phone,
+            'owner_id' => Auth::id(),
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('dashboard');
     }
 }
