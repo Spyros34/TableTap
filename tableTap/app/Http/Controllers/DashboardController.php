@@ -10,7 +10,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $owner = Auth::user();
-        if ($owner->shop === null) {
+
+        // Check if the owner has no shops
+        if ($owner->shops()->count() === 0) {
             return redirect()->route('create-shop');
         }
 

@@ -21,15 +21,14 @@ Route::get('/user-selection', function () {
 })->name('user-selection');
 
 Route::get('/login', function () {
-    return Inertia::render('LoginPages/LoginOwner');
+    return Inertia::render('RegisterPages/UserSelection');
 })->name('login')->middleware(RedirectIfAuthenticated::class);
 
 Route::get('/login/owner', function () {
     return Inertia::render('LoginPages/LoginOwner');
-})->name('login.owner')->middleware(RedirectIfAuthenticated::class);
+})->name('login.owner')->middleware('guest');
 
-Route::post('/login/owner', [LoginController::class, 'loginOwner'])->middleware(RedirectIfAuthenticated::class);
-
+Route::post('/login/owner', [LoginController::class, 'loginOwner'])->middleware('guest');
 Route::get('/login/kitchen', function () {
     return Inertia::render('LoginPages/LoginKitchen');
 })->name('login.kitchen')->middleware(RedirectIfAuthenticated::class);
@@ -50,13 +49,23 @@ Route::post('/register', [RegisterController::class, 'register'])->middleware(Re
 
 // Protected routes that require authentication
 Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', function () {
+        return Inertia::render('Owner/Dashboard');
+    })->name('dashboard');
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen');
     Route::get('/waiter', [WaiterController::class, 'index'])->name('waiter');
     Route::get('/products', [ProductsController::class, 'index'])->name('products');
     Route::get('/qrcode', [QRCodeController::class, 'index'])->name('qrcode');
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/owner/profile', [ProfileController::class, 'index'])->name('owner.profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/kitchen/{id}', [KitchenController::class, 'destroy'])->name('kitchen.destroy');
+
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-    Route::get('/create-shop', [ShopController::class, 'create'])->name('create-shop');
+    Route::get('/create-shop', function () {
+        return Inertia::render('Owner/CreateShop');
+    })->name('create-shop');
     Route::post('/create-shop', [ShopController::class, 'store']);
 });

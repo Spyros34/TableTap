@@ -13,6 +13,7 @@ class RegisterController extends Controller
 {
     public function register(Request $request)
     {
+        // Validate the user input
         $request->validate([
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
@@ -21,6 +22,7 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Create a new owner with hashed password
         $owner = Owner::create([
             'name' => $request->firstName,
             'surname' => $request->lastName,
@@ -29,8 +31,10 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Automatically log the owner in
         Auth::login($owner);
 
-        return redirect()->route('dashboard'); // Redirect to the dashboard after registration
+        // Redirect to the create-shop route so the owner can create a shop
+        return redirect()->route('create-shop'); // Redirect to the create-shop page after registration
     }
 }

@@ -27,16 +27,20 @@ class ShopController extends Controller
         ]);
 
         $shop = Shop::create([
-            'storeName' => $request->storeName,
-            'storeType' => $request->storeType,
+            'brand' => $request->storeName,
+            'type' => $request->storeType,
             'address' => $request->address,
             'region' => $request->region,
             'city' => $request->city,
-            'postalCode' => $request->postalCode,
-            'phone' => $request->phone,
+            'tk' => $request->postalCode,
+            'phone_number' => $request->phone,
             'owner_id' => Auth::id(),
         ]);
 
+        $owner = Auth::user();
+        $owner->shops()->attach($shop->id);
+    
         return redirect()->route('dashboard');
+
     }
 }

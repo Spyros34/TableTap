@@ -9,37 +9,29 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     public function loginOwner(Request $request)
-{
-    $credentials = $request->only('username', 'password');
-
-    // Log the credentials being attempted
-    logger()->info('Attempting login with credentials: ', $credentials);
-
-    if (Auth::guard('owner')->attempt($credentials)) {
-        return redirect()->intended('/dashboard');
-    }
-
-    // Log a warning if login failed
-    logger()->warning('Login failed for username: ' . $credentials['username']);
-
-    return back()->withErrors(['username' => 'Invalid username or password']);
-}
-
-    public function loginKitchen(Request $request)
     {
-        $credentials = $request->only('name', 'password');
-        if (Auth::guard('kitchen')->attempt($credentials)) {
-            return redirect()->intended('/kitchen');
-        }
-        return back()->withErrors(['name' => 'Invalid credentials']);
-    }
+        // Validate the credentials
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-    public function loginWaiter(Request $request)
-    {
-        $credentials = $request->only('username', 'password');
-        if (Auth::guard('waiter')->attempt($credentials)) {
-            return redirect()->intended('/waiter');
+        // Attempt to log in the owner
+        if (Auth::attempt($credentials)) {
+            $owner = Auth::user();
+
+            // If no shop exists, redirect to shop creation page
+            if ($owner->shops()->count() === 0) {
+                return redirect()->route('create-shop');
+            }
+
+            // Redirect to the dashboard
+            return redirect()->intended('/');
         }
-        return back()->withErrors(['username' => 'Invalid credentials']);
+
+        // If login fails, return with an error
+        return back()->withErrors([
+            'username' => 'Invalid username or password',
+        ]);
     }
 }

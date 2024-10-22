@@ -18,8 +18,5 @@ class Owner extends Authenticatable implements AuthenticatableContract
         return $this->belongsToMany(Shop::class, 'owner_shop');
     }
 
-    public function setPasswordAttribute($password)
-    {
-        $this->attributes['password'] = bcrypt($password);
-    }
+    
 }

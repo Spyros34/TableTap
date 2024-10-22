@@ -1,19 +1,20 @@
-<script setup>
-import { Link } from '@inertiajs/vue3';
-
-defineProps({
-    href: {
-        type: String,
-        required: true,
-    },
-});
-</script>
-
 <template>
     <Link
-        :href="href"
-        class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out"
+      :href="href"
+      :method="method"
+      as="button"
+      class="block w-full text-left px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out"
     >
-        <slot />
+      <slot />
     </Link>
-</template>
+  </template>
+  
+  <script setup>
+  import { defineProps } from 'vue';
+  import { Link } from '@inertiajs/vue3';
+  
+  const props = defineProps({
+    href: String,
+    method: String,
+  });
+  </script>
