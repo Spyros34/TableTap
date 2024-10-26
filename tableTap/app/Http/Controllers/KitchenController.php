@@ -68,6 +68,7 @@ class KitchenController extends Controller
     
        // Use standard Laravel flash messaging
        // Return a JSON response for successful deletion
+       
         return response()->json(['success' => 'Kitchen item deleted successfully.']);
        
     }
