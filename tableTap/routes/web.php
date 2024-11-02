@@ -61,7 +61,7 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/kitchen/{id}', [KitchenController::class, 'destroy'])->name('kitchen.destroy');
-
+    Route::put('/password/update', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::get('/create-shop', function () {

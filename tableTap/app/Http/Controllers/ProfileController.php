@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
@@ -80,7 +82,35 @@ public function edit(Request $request): Response
         return Redirect::route('profile.edit')->with('flash', ['success' => 'Profile updated successfully.']);
     }
     
-    
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'current_password' => ['required'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'], // Ensure password confirmation
+        ]);
+
+        $user = Auth::user();
+
+        // Check if the current password matches
+        if (!Hash::check($request->current_password, $user->password)) {
+            // If not, throw a validation error
+            throw ValidationException::withMessages([
+                'current_password' => 'The current password is incorrect.',
+            ]);
+        }
+
+        // Update the user's password
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Redirect with a success message
+        return back()->with('flash', ['success' => 'Password updated successfully.']);
+    }
 
     /**
      * Delete the user's account.
