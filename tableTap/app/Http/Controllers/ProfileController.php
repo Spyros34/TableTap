@@ -115,20 +115,23 @@ public function edit(Request $request): Response
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
-        Auth::logout();
+        $user = Auth::user();
 
+        // Check if the user has an associated shop and delete it
+        if ($user->shops()->exists()) {
+            $user->shops()->delete();
+        }
+
+        // Delete the user
+        Auth::logout();
         $user->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return redirect()->route('login')->with('success', 'Your account and associated shop have been deleted.');
     }
 }
