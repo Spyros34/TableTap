@@ -53,6 +53,7 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
         return Inertia::render('Owner/Dashboard');
     })->name('dashboard');
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen');
+    Route::post('/kitchens', [KitchenController::class, 'store'])->name('kitchen.store');
     Route::get('/waiter', [WaiterController::class, 'index'])->name('waiter');
     Route::get('/products', [ProductsController::class, 'index'])->name('products');
     Route::get('/qrcode', [QRCodeController::class, 'index'])->name('qrcode');

@@ -2,9 +2,14 @@
   <MainLayout :title="title">
     <div class="grid 2xl:grid-cols-1 lg:grid-cols-1 md:grid-cols-1 sm:grid-cols-1 mr-6 gap-5">
       <Widget maxWidth="full" align="center">
-        <div class="flex items-center justify-center mb-4">
-          <h3 class="text-lg font-semibold break-words mr-2">Search Kitchen</h3>
-          <span class="material-icons text-gray-600 group-hover:text-blue-600">kitchen</span>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <h3 class="text-lg font-semibold break-words mr-2">Search Kitchen</h3>
+            <span class="material-icons text-gray-600 group-hover:text-blue-600">kitchen</span>
+          </div>
+          <button @click="showModal = true" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">
+            <span class="material-icons">add</span>
+          </button>
         </div>
         
         <div class="mb-4 flex justify-center">
@@ -36,20 +41,32 @@
           <p>No results found.</p>
         </div>
       </Widget>
+
+      <!-- Create Kitchen Modal -->
+      <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center">
+        <form @submit.prevent="createKitchen" class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+          <h3 class="text-lg font-semibold mb-4">Create New Kitchen</h3>
+          <input v-model="form.name" type="text" placeholder="Kitchen Name" class="w-full p-2 border border-gray-300 rounded-lg mb-4" />
+          <input v-model="form.password" type="password" placeholder="Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
+          <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
+          <div class="flex justify-end space-x-2">
+            <button @click="showModal = false" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancel</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Create</button>
+          </div>
+        </form>
+      </div>
     </div>
   </MainLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, useForm } from '@inertiajs/vue3';
+import toastr from 'toastr';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Widget from '@/Widgets/Widget.vue';
-import axios from 'axios';
-import toastr from 'toastr'; // Import toastr
-import 'toastr/build/toastr.min.css'; // Import toastr CSS
+import 'toastr/build/toastr.min.css';
 
-// Configure Toastr options
 toastr.options = {
   closeButton: true,
   progressBar: true,
@@ -57,43 +74,67 @@ toastr.options = {
   timeOut: 5000,
 };
 
-// Define the search query, title, kitchen items, and flash message
 const searchQuery = ref('');
 const title = ref('Kitchen');
-const kitchenItems = ref(usePage().props.kitchenItems);
+const kitchenItems = ref(usePage().props.kitchenItems || []);
 const flashMessage = ref(usePage().props.flash?.success || '');
 
-// Computed properties for filtered and limited items
+const showModal = ref(false);
+const form = useForm({
+  name: '',
+  password: '',
+  password_confirmation: ''
+});
+
 const filteredKitchenItems = computed(() => {
   if (!searchQuery.value) return kitchenItems.value;
-  return kitchenItems.value.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  return kitchenItems.value.filter(item => item?.name?.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
-
 const maxItems = 5;
-const limitedKitchenItems = computed(() => {
-  return filteredKitchenItems.value.slice(0, maxItems);
-});
+const limitedKitchenItems = computed(() => filteredKitchenItems.value.slice(0, maxItems));
 
-// Delete item function using Axios
-const deleteItem = async (id) => {
-  if (confirm('Are you sure you want to delete this item?')) {
-    try {
-      const response = await axios.delete(route('kitchen.destroy', id));
-      
-      // Update kitchen items and display success message
-      kitchenItems.value = kitchenItems.value.filter(item => item.id !== id);
-      flashMessage.value = response.data.success;
-      toastr.success(flashMessage.value);
-    } catch (error) {
-      toastr.error('An error occurred while deleting the item.');
-      console.error(error);
-    }
+const createKitchen = () => {
+  if (!form.name || !form.password || !form.password_confirmation) {
+    toastr.error('Please fill in all fields.');
+    return;
   }
+
+  if (form.password !== form.password_confirmation) {
+    toastr.error('Passwords do not match.');
+    return;
+  }
+
+  form.post('/kitchens', {
+    onSuccess: (page) => {
+      const newKitchen = page.props.kitchenItems[page.props.kitchenItems.length - 1];
+      if (newKitchen && newKitchen.name) {
+        kitchenItems.value.push(newKitchen);
+        toastr.success('Kitchen created successfully.');
+      } else {
+        toastr.error('Failed to retrieve the created kitchen data.');
+      }
+      form.reset();
+      showModal.value = false;
+    },
+    onError: () => {
+      toastr.error('An error occurred while creating the kitchen.');
+    },
+  });
 };
 
-// Display flash message on mount if it exists
+// Delete a kitchen item
+const deleteItem = (id) => {
+  form.delete(`/kitchen/${id}`, {
+    onSuccess: () => {
+      kitchenItems.value = kitchenItems.value.filter(item => item.id !== id);
+      toastr.success('Kitchen deleted successfully.');
+    },
+    onError: () => {
+      toastr.error('An error occurred while deleting the kitchen.');
+    },
+  });
+};
+
 onMounted(() => {
   if (flashMessage.value) {
     toastr.success(flashMessage.value);

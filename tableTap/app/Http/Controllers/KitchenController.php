@@ -3,8 +3,10 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Kitchen;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Hash;
+
 
 class KitchenController extends Controller
 {
@@ -29,10 +31,27 @@ class KitchenController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
+
+     public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'name' => ['required', 'string', 'max:255', 'unique:kitchens,name'],
+        'password' => ['required', 'string', 'confirmed', 'min:8'],
+    ]);
+
+    // Create the new kitchen
+    $kitchen = Kitchen::create([
+        'name' => $validatedData['name'],
+        'password' => Hash::make($validatedData['password']),
+    ]);
+
+    // Return a JSON response to Inertia
+    return Redirect::back()->with([
+        'flash' => ['success' => 'Kitchen created successfully.'],
+        'newKitchen' => $kitchen,
+    ]);
+}
+
 
     /**
      * Display the specified resource.
@@ -66,11 +85,8 @@ class KitchenController extends Controller
         $kitchen = Kitchen::findOrFail($id);
         $kitchen->delete();
     
-       // Use standard Laravel flash messaging
-       // Return a JSON response for successful deletion
-       
-        return response()->json(['success' => 'Kitchen item deleted successfully.']);
-       
+        // Redirect back to the kitchen index with a flash success message
+        return Redirect::route('kitchen')->with('flash', ['success' => 'Kitchen item deleted successfully.']);
     }
     
 
