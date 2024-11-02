@@ -15,9 +15,9 @@
     </ul>
   </div>
 
-  <div class="md:hidden fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 bg-white border border-gray2 rounded-full bottom-4 left-1/2">
-    <div class="grid h-full max-w-lg grid-cols-7 mx-auto">
-      <Link href="/" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-slate group">
+  <div class="md:hidden fixed z-50 w-9/12 h-16 max-w-lg -translate-x-1/2 bg-white border border-gray2 rounded-full bottom-4 left-1/2 ">
+    <div class="grid h-full max-w-lg grid-cols-6 mx-auto ">
+      <Link href="/" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-slate group ">
         <span class="material-icons text-gray2 group-hover:text-blue-600">dashboard</span>
         <span class="sr-only">Dashboard</span>
       </Link>

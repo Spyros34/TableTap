@@ -13,37 +13,74 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+    // ProfileController.php
 
-    public function index()
-    {
-        return Inertia::render('Owner/Profile');
-    }
-    public function edit(Request $request): Response
-    {
-        return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
-        ]);
-    }
+// ProfileController.php
+
+// ProfileController.php
+public function edit(Request $request): Response
+{
+    $user = $request->user();
+    $shop = $user->shops()->first(); // Assuming there's a relationship set up for shops
+
+    return Inertia::render('Profile/Edit', [
+        'owner' => [
+            'name' => $user->name,
+            'surname' => $user->surname,
+            'username' => $user->username,
+            'email' => $user->email,
+        ],
+        'shop' => $shop ? [
+            'storeName' => $shop->brand,
+            'storeType' => $shop->type,
+            'address' => $shop->address,
+            'region' => $shop->region,
+            'city' => $shop->city,
+            'postalCode' => $shop->tk,
+            'phone' => $shop->phone_number,
+        ] : null,
+    ]);
+}
+
 
     /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $validated = array_filter($request->validated(), fn($value) => $value !== null);
+    
+        if (empty($validated)) {
+            return back()->withErrors(['general' => 'Please fill at least one field before submitting.']);
         }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit');
+    
+        $owner = $request->user();
+    
+        // Update only the fields in `owners` table
+        $owner->fill(array_filter($validated, function ($value, $key) {
+            return in_array($key, ['name', 'surname', 'username', 'email']);
+        }, ARRAY_FILTER_USE_BOTH));
+        $owner->save();
+    
+        // Update related Shop fields if shop exists
+        if ($owner->shops()->exists()) {
+            $shop = $owner->shops()->first();
+            $shopData = [
+                'brand' => $validated['storeName'] ?? $shop->brand,
+                'type' => $validated['storeType'] ?? $shop->type,
+                'address' => $validated['address'] ?? $shop->address,
+                'region' => $validated['region'] ?? $shop->region,
+                'city' => $validated['city'] ?? $shop->city,
+                'tk' => $validated['postalCode'] ?? $shop->tk,
+                'phone_number' => $validated['phone'] ?? $shop->phone_number,
+            ];
+            $shop->update(array_filter($shopData));
+        }
+    
+        return Redirect::route('profile.edit')->with('flash', ['success' => 'Profile updated successfully.']);
     }
+    
+    
 
     /**
      * Delete the user's account.
@@ -55,7 +92,6 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-
         Auth::logout();
 
         $user->delete();

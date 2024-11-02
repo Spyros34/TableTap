@@ -10,6 +10,7 @@ module.exports = {
           '1/2': '50%',
           '1/3': '33.333333%',
           'full': '100%',
+          
         },
         colors: {
           'gray': '#fafafa',
