@@ -1,17 +1,9 @@
 <template>
   <MainLayout :title="title">
-    <!-- Add Kitchen Button for Very Small Screens -->
-    <div class="flex justify-center mb-4 sm:hidden">
-      <button @click="showModal = true" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2">
-        <span class="material-icons">add</span>
-        <span>Add Kitchen</span>
-      </button>
-    </div>
-
     <div class="grid 2xl:grid-cols-1 lg:grid-cols-1 md:grid-cols-1 sm:grid-cols-1 mr-6 gap-5">
       <Widget maxWidth="full" align="center">
         <!-- Floating Plus Button for Larger Screens -->
-        <div class="flex items-end justify-end mb-4 mr-4 hidden sm:flex">
+        <div class="flex items-end justify-end mb-4 mr-4 sm:flex">
           <button @click="showModal = true" class="bg-green-500 hover:bg-green-700 text-white font-bold py-0 px-2 rounded">
             <span class="material-icons py-1">add</span>
           </button>
@@ -44,7 +36,7 @@
                   <p class="text-gray-700">{{ item.name }}</p>
                   <button
                     @click="deleteItem(item.id)"
-                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 pt-2 px-2 rounded">
                     <span class="material-icons">delete</span>
                   </button>
                 </div>
@@ -61,9 +53,22 @@
       <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center">
         <form @submit.prevent="createKitchen" class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
           <h3 class="text-lg font-semibold mb-4 text-center">Create New Kitchen</h3>
-          <input v-model="form.name" type="text" placeholder="Kitchen Name" class="w-full p-2 border border-gray-300 rounded-lg mb-4" />
-          <input v-model="form.password" type="password" placeholder="Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
-          <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
+          
+          <div class="mb-4">
+            <input v-model="form.name" type="text" placeholder="Kitchen Name" class="w-full p-2 border border-gray-300 rounded-lg" />
+            <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</p>
+          </div>
+
+          <div class="mb-4">
+            <input v-model="form.password" type="password" placeholder="Password" class="w-full p-2 border border-gray-300 rounded-lg" autocomplete="new-password" />
+            <p v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</p>
+          </div>
+
+          <div class="mb-4">
+            <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password" class="w-full p-2 border border-gray-300 rounded-lg" autocomplete="new-password" />
+            <p v-if="form.errors.password_confirmation" class="text-red-500 text-sm mt-1">{{ form.errors.password_confirmation }}</p>
+          </div>
+
           <div class="flex justify-end space-x-2">
             <button @click="showModal = false" type="button" class="text-gray-500 font-bold py-2 px-4 rounded">Cancel</button>
             <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Create</button>
@@ -109,16 +114,8 @@ const maxItems = 5;
 const limitedKitchenItems = computed(() => filteredKitchenItems.value.slice(0, maxItems));
 
 const createKitchen = () => {
-  if (!form.name || !form.password || !form.password_confirmation) {
-    toastr.error('Please fill in all fields.');
-    return;
-  }
-
-  if (form.password !== form.password_confirmation) {
-    toastr.error('Passwords do not match.');
-    return;
-  }
-
+  form.clearErrors(); // Clear previous errors before submission
+  
   form.post('/kitchens', {
     onSuccess: (page) => {
       const newKitchen = page.props.kitchenItems[page.props.kitchenItems.length - 1];
@@ -132,7 +129,10 @@ const createKitchen = () => {
       showModal.value = false;
     },
     onError: () => {
-      toastr.error('An error occurred while creating the kitchen.');
+      // Display form-specific errors in toastr for visibility
+      Object.keys(form.errors).forEach((field) => {
+        toastr.error(form.errors[field]);
+      });
     },
   });
 };
