@@ -50,7 +50,7 @@
           <input v-model="form.password" type="password" placeholder="Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
           <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password" class="w-full p-2 border border-gray-300 rounded-lg mb-4" autocomplete="new-password" />
           <div class="flex justify-end space-x-2">
-            <button @click="showModal = false" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancel</button>
+            <button @click="showModal = false" class=" text-gray2 font-bold py-2 px-4 rounded">Cancel</button>
             <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Create</button>
           </div>
         </form>

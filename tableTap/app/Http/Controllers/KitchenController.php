@@ -3,7 +3,9 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Kitchen;
+use App\Models\Shop;
 use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 
@@ -34,16 +36,28 @@ class KitchenController extends Controller
 
      public function store(Request $request)
 {
+    // Validate the input data 
     $validatedData = $request->validate([
         'name' => ['required', 'string', 'max:255', 'unique:kitchens,name'],
         'password' => ['required', 'string', 'confirmed', 'min:8'],
     ]);
+
+    // Retrieve the current shop based on the authenticated user
+    $user = Auth::user();
+    $shop = $user->shops()->first(); // Adjust as needed if a user has multiple shops
+
+    if (!$shop) {
+        return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
+    }
 
     // Create the new kitchen
     $kitchen = Kitchen::create([
         'name' => $validatedData['name'],
         'password' => Hash::make($validatedData['password']),
     ]);
+
+    // Associate the new kitchen with the user's shop and add created_at timestamp
+    $shop->kitchens()->attach($kitchen->id, ['created_at' => now()]);
 
     // Return a JSON response to Inertia
     return Redirect::back()->with([
@@ -83,10 +97,15 @@ class KitchenController extends Controller
     public function destroy($id)
     {
         $kitchen = Kitchen::findOrFail($id);
+    
+        // Detach the kitchen from all associated shops
+        $kitchen->shops()->detach();
+    
+        // Delete the kitchen
         $kitchen->delete();
     
         // Redirect back to the kitchen index with a flash success message
-        return Redirect::route('kitchen')->with('flash', ['success' => 'Kitchen item deleted successfully.']);
+        return Redirect::route('kitchen')->with('flash', ['success' => 'Kitchen item and its associations deleted successfully.']);
     }
     
 
