@@ -75,20 +75,29 @@ class KitchenController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-        //
+        $kitchen = Kitchen::findOrFail($id);
+        
+        $validatedData = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+    
+        if ($request->has('name')) {
+            $kitchen->name = $validatedData['name'];
+        }
+        if ($request->filled('password')) {
+            $kitchen->password = Hash::make($validatedData['password']);
+        }
+    
+        $kitchen->save();
+    
+        return back()->with('flash', ['success' => 'Kitchen updated successfully.']);
     }
 
     /**
@@ -105,7 +114,7 @@ class KitchenController extends Controller
         $kitchen->delete();
     
         // Redirect back to the kitchen index with a flash success message
-        return Redirect::route('kitchen')->with('flash', ['success' => 'Kitchen item and its associations deleted successfully.']);
+        return back()->with('flash', ['success' => 'Kitchen deleted successfully.']);
     }
     
 
