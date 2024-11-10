@@ -21,9 +21,9 @@
         </div>
 
         <!-- Kitchen List -->
-        <div class="mt-10 mb-5" v-if="filteredKitchenItems.length">
+        <div class="mt-10 mb-5" v-if="paginatedKitchenItems.length">
           <ul class="space-y-4">
-            <li v-for="item in limitedKitchenItems" :key="item.id" class="flex justify-center">
+            <li v-for="item in paginatedKitchenItems" :key="item.id" class="flex justify-center">
               <Widget class="w-full max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm mx-auto p-4 border border-gray-200 rounded-lg shadow-md">
                 <div class="flex justify-between items-center w-full cursor-pointer" @click="openEditModal(item)">
                   <p class="text-gray-700">{{ item.name }}</p>
@@ -38,7 +38,30 @@
         <div v-else>
           <p class="text-center text-gray-600 text-lg mt-10">No results found.</p>
         </div>
+        <!-- Pagination Controls -->
+        <div class="flex justify-center items-center mt-6 space-x-4">
+            <button 
+              @click="prevPage" 
+              :disabled="currentPage === 1" 
+              class="px-3 py-1 border rounded bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              Previous
+            </button>
+            
+            <span class="text-gray-700 font-semibold">
+              Page {{ currentPage }} of {{ totalPages }}
+            </span>
+            
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage === totalPages" 
+              class="px-3 py-1 border rounded bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              Next
+            </button>
+          </div>
       </Widget>
+
 
       <!-- Create Kitchen Modal -->
       <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center">
@@ -157,8 +180,26 @@ const filteredKitchenItems = computed(() => {
   if (!searchQuery.value) return kitchenItems.value;
   return kitchenItems.value.filter(item => item?.name?.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
-const maxItems = 5;
-const limitedKitchenItems = computed(() => filteredKitchenItems.value.slice(0, maxItems));
+
+// Pagination logic
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredKitchenItems.value.length / itemsPerPage)));
+
+const paginatedKitchenItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredKitchenItems.value.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
 
 const createKitchen = () => {
   form.clearErrors();

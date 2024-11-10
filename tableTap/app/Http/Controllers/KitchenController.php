@@ -83,20 +83,30 @@ class KitchenController extends Controller
     {
         $kitchen = Kitchen::findOrFail($id);
         
+        // Validate the input data
         $validatedData = $request->validate([
-            'name' => 'nullable|string|max:255',
+            'name' => [
+                'nullable',
+                'string',
+                'max:255',
+                // Ensures the name is unique, excluding the current kitchen's ID
+                'unique:kitchens,name,' . $kitchen->id
+            ],
             'password' => 'nullable|string|min:8|confirmed',
         ]);
-    
-        if ($request->has('name')) {
+        
+        // Check if the name field is provided and update
+        if ($request->filled('name')) {
             $kitchen->name = $validatedData['name'];
         }
+        
+        // Check if the password field is provided and update
         if ($request->filled('password')) {
             $kitchen->password = Hash::make($validatedData['password']);
         }
-    
+        
         $kitchen->save();
-    
+        
         return back()->with('flash', ['success' => 'Kitchen updated successfully.']);
     }
 
