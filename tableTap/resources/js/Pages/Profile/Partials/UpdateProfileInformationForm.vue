@@ -1,8 +1,13 @@
-<template>
+<template >
   <div>
-    <h2 class="text-xl font-bold mb-4">Update Profile Information</h2>
-    <form @submit.prevent="submitProfile" class="w-full">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Profile Information <button v-if="!isEditing" @click="isEditing = true" class="text-gray-500 hover:text-blue-500 ml-3">
+        <span class="material-icons">edit</span>
+      </button></h2>
       
+    </div>
+    
+    <form v-if="isEditing" @submit.prevent="submitProfile" class="w-full">
       <!-- Owner Information Fields -->
       <div v-for="field in ownerFields" :key="field.id" class="mb-4">
         <label :for="field.id" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
@@ -56,9 +61,23 @@
       </div>
 
       <div class="flex items-center justify-between mt-4">
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Update Profile</button>
+        <button @click="cancelEdit" type="button" class="text-gray-500 px-4 py-2 rounded-lg">Cancel</button>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Save Changes</button>
       </div>
     </form>
+
+    <div v-else>
+      <!-- Display Profile Information in View Mode -->
+      <div v-for="field in ownerFields" :key="field.id" class="mb-4">
+        <p class="text-sm font-medium text-gray-700">{{ field.label }}</p>
+        <p class="text-gray-900">{{ placeholders[field.id] || '-' }}</p>
+      </div>
+
+      <div v-for="field in shopFields" :key="field.id" class="mb-4">
+        <p class="text-sm font-medium text-gray-700">{{ field.label }}</p>
+        <p class="text-gray-900">{{ placeholders[field.id] || '-' }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -79,6 +98,8 @@ const props = defineProps({
   owner: Object,
   shop: Object,
 });
+
+const isEditing = ref(false); // New ref to track edit mode
 
 const placeholders = ref({
   name: props.owner.name || 'Enter name',
@@ -108,7 +129,6 @@ const form = useForm({
   phone: '',
 });
 
-// Field Definitions
 const ownerFields = ref([
   { id: 'name', label: 'Name', type: 'text' },
   { id: 'surname', label: 'Surname', type: 'text' },
@@ -126,7 +146,6 @@ const shopFields = ref([
   { id: 'phone', label: 'Phone Number', type: 'text' },
 ]);
 
-// Validation Patterns
 const validationPatterns = {
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   postalCode: /^[0-9]{5}$/,
@@ -135,7 +154,6 @@ const validationPatterns = {
   city: /^[a-zA-Z\s]+$/,
 };
 
-// Validate fields before submission
 const validateField = (field) => {
   const value = form[field];
   let error = '';
@@ -153,20 +171,16 @@ const validateField = (field) => {
   form.errors[field] = error;
 };
 
-// Submit only if fields are valid and filled
 const submitProfile = () => {
-  // Collect non-empty fields only
   const filledFields = Object.fromEntries(
     Object.entries(form.data()).filter(([_, value]) => value !== '')
   );
 
-  // Check if no fields are filled and display an info message
   if (Object.keys(filledFields).length === 0) {
     toastr.info('Please fill at least one field before submitting.');
     return;
   }
 
-  // Validate each field before submission
   let hasClientErrors = false;
   for (const field in filledFields) {
     validateField(field);
@@ -175,13 +189,11 @@ const submitProfile = () => {
     }
   }
 
-  // If there are validation errors, show an error message and don't proceed
   if (hasClientErrors) {
     toastr.error('Please correct the errors in the form.');
     return;
   }
 
-  // Submit form data if all validations pass
   form.put(route('profile.update'), {
     data: filledFields,
     onSuccess: () => {
@@ -190,11 +202,17 @@ const submitProfile = () => {
         placeholders.value[key] = form[key] || placeholders.value[key];
       });
       form.reset();
+      isEditing.value = false;
     },
     onError: (errors) => {
       toastr.error('Please review the errors in the form.');
       form.errors = errors;
     },
   });
+};
+
+const cancelEdit = () => {
+  isEditing.value = false;
+  form.reset();
 };
 </script>
