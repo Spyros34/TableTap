@@ -19,4 +19,6 @@ class Owner extends Authenticatable implements AuthenticatableContract
     }
 
     
+
+    
 }

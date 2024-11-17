@@ -31,4 +31,11 @@ class Shop extends Model
         return $this->belongsToMany(Product::class, 'shop_product')->withPivot('product_id');
     }
 
+    // Define the relationship with Waiter
+    public function waiters()
+    {
+        return $this->belongsToMany(Waiter::class, 'shop_waiter')
+                    ->withTimestamps();
+    }
+
 }

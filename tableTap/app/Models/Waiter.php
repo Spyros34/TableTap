@@ -12,4 +12,10 @@ class Waiter extends Model
     {
         return $this->hasOne(Order::class);
     }
+    // Define the relationship with Shop
+    public function shops()
+    {
+        return $this->belongsToMany(Shop::class, 'shop_waiter')
+                    ->withTimestamps();
+    }
 }
