@@ -3,53 +3,109 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\Shop;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
 class ProductsController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        return Inertia::render('Owner/Products');
-    }
+        // Get the authenticated user
+        $user = Auth::user();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        // Get the user's shop (assuming a user has one shop)
+        $shop = $user->shops()->first();
+
+        if (!$shop) {
+            return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
+        }
+
+        // Get all products associated with the shop
+        $products = $shop->products;
+
+        return Inertia::render('Owner/Products', [
+            'productItems' => $products,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+     public function store(Request $request)
+     {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name'         => 'required|string|max:255|unique:products,name',
+            'price'        => 'required|numeric|min:0',
+            'quantity'     => 'required|integer|min:0',
+            'availability' => 'required|boolean',
+        ]);
+
+        // Get the authenticated user and their shop
+        $user = Auth::user();
+        $shop = $user->shops()->first();
+
+        if (!$shop) {
+            return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
+        }
+
+        // Create the product
+        $product = Product::create($validatedData);
+
+        // Attach the product to the shop
+        $shop->products()->attach($product->id, ['created_at' => now()]);
+
+        // Return back with flash message and new product data
+        return Redirect::back()->with([
+            'flash'      => ['success' => 'Product created successfully.'],
+            'newProduct' => $product,
+        ]);
+     }
+ 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        // Find the product by ID
+        $product = Product::findOrFail($id);
+
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name'         => 'nullable|string|max:255|unique:products,name,' . $id,
+            'price'        => 'nullable|numeric|min:0',
+            'quantity'     => 'nullable|integer|min:0',
+            'availability' => 'nullable|boolean',
+        ]);
+
+        // Update product fields if provided
+        if ($request->filled('name')) {
+            $product->name = $validatedData['name'];
+        }
+        if ($request->filled('price')) {
+            $product->price = $validatedData['price'];
+        }
+        if ($request->filled('quantity')) {
+            $product->quantity = $validatedData['quantity'];
+        }
+        if ($request->filled('availability')) {
+            $product->availability = $validatedData['availability'];
+        }
+
+        // Save the changes
+        $product->save();
+
+        // Return back with flash message
+        return Redirect::back()->with('flash', ['success' => 'Product updated successfully.']);
     }
 
     /**
@@ -57,6 +113,14 @@ class ProductsController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+
+        $product->shop()->detach();
+
+        $product->delete();
+
+        return Redirect::back()->with('flash', [
+            'success' => 'Product deleted successfully.',
+        ]);
     }
 }

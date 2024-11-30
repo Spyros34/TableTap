@@ -55,13 +55,16 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen');
     Route::post('/kitchens', [KitchenController::class, 'store'])->name('kitchen.store');
     Route::put('/kitchens/{id}', [KitchenController::class, 'update'])->name('kitchen.update');
-     // Waiter routes
-     Route::get('/waiter', [WaiterController::class, 'index'])->name('waiter');
-     Route::post('/waiter', [WaiterController::class, 'store'])->name('waiter.store');
-     Route::put('/waiters/{id}', [WaiterController::class, 'update'])->name('waiter.update');
-     Route::delete('/waiter/{id}', [WaiterController::class, 'destroy'])->name('waiter.destroy');
+    // Waiter routes
+    Route::get('/waiter', [WaiterController::class, 'index'])->name('waiter');
+    Route::post('/waiter', [WaiterController::class, 'store'])->name('waiter.store');
+    Route::put('/waiters/{id}', [WaiterController::class, 'update'])->name('waiter.update');
+    Route::delete('/waiter/{id}', [WaiterController::class, 'destroy'])->name('waiter.destroy');
 
-    Route::get('/products', [ProductsController::class, 'index'])->name('products');
+    Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductsController::class, 'store'])->name('products.store');
+    Route::put('/products/{id}', [ProductsController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductsController::class, 'destroy'])->name('products.destroy');
     Route::get('/qrcode', [QRCodeController::class, 'index'])->name('qrcode');
     Route::get('/owner/profile', [ProfileController::class, 'index'])->name('owner.profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
