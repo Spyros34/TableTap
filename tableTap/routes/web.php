@@ -14,6 +14,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShopController;
 use App\Http\Middleware\EnsureUserIsAuthenticated;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Controllers\TableController;
 
 // Public routes
 Route::get('/user-selection', function () {
@@ -46,6 +47,8 @@ Route::get('/register', function () {
 })->name('register.owner')->middleware(RedirectIfAuthenticated::class);
 
 Route::post('/register', [RegisterController::class, 'register'])->middleware(RedirectIfAuthenticated::class);
+// Route to handle scanning of the QR code (accessible without authentication if needed)
+Route::get('/scan', [TableController::class, 'scan'])->name('table.scan');
 
 // Protected routes that require authentication
 Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
@@ -78,4 +81,12 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
         return Inertia::render('Owner/CreateShop');
     })->name('create-shop');
     Route::post('/create-shop', [ShopController::class, 'store']);
+
+    // Route to handle table creation and QR code generation
+    Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
+    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+    Route::put('/tables/{id}', [TableController::class, 'update'])->name('tables.update');
+    Route::delete('/tables/{id}', [TableController::class, 'destroy'])->name('tables.destroy');
+    // Route to serve the QR code image
+    Route::get('/tables/{id}/qrcode', [TableController::class, 'showQRCodeImage'])->name('table.qrcode');
 });
