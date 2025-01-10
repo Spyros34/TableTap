@@ -38,4 +38,9 @@ class Shop extends Model
                     ->withTimestamps();
     }
 
+    public function orders()
+    {
+        return $this->hasManyThrough(Order::class, Table::class, 'shop_id', 'table_id', 'id', 'id');
+    }
+
 }

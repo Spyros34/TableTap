@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Kitchen extends Model
+class Kitchen extends Authenticatable
 {
     protected $fillable = ['name', 'password'];
 
-    public function shops()
+    /**
+     * Define the many-to-many relationship with Shop.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function shops(): BelongsToMany
     {
         return $this->belongsToMany(Shop::class, 'shop_kitchen');
     }

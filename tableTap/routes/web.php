@@ -2,19 +2,20 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\TableController;
 use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\WaiterController;
 use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\ShopController;
-use App\Http\Middleware\EnsureUserIsAuthenticated;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\RedirectIfAuthenticated;
-use App\Http\Controllers\TableController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\KitchenManagerController;
+use App\Http\Middleware\EnsureUserIsAuthenticated;
 
 // Public routes
 Route::get('/user-selection', function () {
@@ -30,12 +31,11 @@ Route::get('/login/owner', function () {
 })->name('login.owner')->middleware('guest');
 
 Route::post('/login/owner', [LoginController::class, 'loginOwner'])->middleware('guest');
+Route::post('/login/kitchen', [LoginController::class, 'loginKitchen'])->middleware('guest');
 Route::get('/login/kitchen', function () {
     return Inertia::render('LoginPages/LoginKitchen');
-})->name('login.kitchen')->middleware(RedirectIfAuthenticated::class);
-
-Route::post('/login/kitchen', [LoginController::class, 'loginKitchen'])->middleware(RedirectIfAuthenticated::class);
-
+})->name('login.kitchen')->middleware('guest');
+Route::get('/kitchen/dashboard', [KitchenManagerController::class, 'index'])->middleware('auth')->name('kitchen.dashboard');
 Route::get('/login/waiter', function () {
     return Inertia::render('LoginPages/LoginWaiter');
 })->name('login.waiter')->middleware(RedirectIfAuthenticated::class);
@@ -58,12 +58,19 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen');
     Route::post('/kitchens', [KitchenController::class, 'store'])->name('kitchen.store');
     Route::put('/kitchens/{id}', [KitchenController::class, 'update'])->name('kitchen.update');
+    Route::middleware(['auth:kitchen'])->group(function () {
+        Route::get('/kitchen/dashboard', [KitchenManagerController::class, 'index'])->name('kitchen.dashboard');
+        Route::post('/kitchen/products/{id}/update', [KitchenManagerController::class, 'updateProduct']);
+        Route::post('/kitchen/orders/{id}/ready', [KitchenManagerController::class, 'markOrderAsReady']);
+        Route::post('/kitchen/orders/clear-ready', [KitchenManagerController::class, 'clearReadyOrders']);
+        Route::get('/kitchen/orders-with-items', [KitchenManagerController::class, 'getOrdersWithItems']);
+    });
     // Waiter routes
     Route::get('/waiter', [WaiterController::class, 'index'])->name('waiter');
     Route::post('/waiter', [WaiterController::class, 'store'])->name('waiter.store');
     Route::put('/waiters/{id}', [WaiterController::class, 'update'])->name('waiter.update');
     Route::delete('/waiter/{id}', [WaiterController::class, 'destroy'])->name('waiter.destroy');
-
+   
     Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductsController::class, 'store'])->name('products.store');
     Route::put('/products/{id}', [ProductsController::class, 'update'])->name('products.update');
@@ -89,4 +96,6 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::delete('/tables/{id}', [TableController::class, 'destroy'])->name('tables.destroy');
     // Route to serve the QR code image
     Route::get('/tables/{id}/qrcode', [TableController::class, 'showQRCodeImage'])->name('table.qrcode');
+
+
 });

@@ -17,7 +17,14 @@ class Product extends Model
         'quantity'
     ];
 
-    public function shop()
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+
+    public function shops()
     {
         return $this->belongsToMany(Shop::class, 'shop_product')->withPivot('shop_id');
     }

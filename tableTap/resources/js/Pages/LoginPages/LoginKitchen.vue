@@ -1,86 +1,61 @@
 <template>
   <AuthLayout title="Kitchen Login">
+    <form @submit.prevent="submitLogin" class="w-full">
+      <!-- Username Field -->
+      <div class="mb-4">
+        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+        <input
+          v-model="form.username"
+          type="text"
+          id="username"
+          class="mt-1 p-2 w-full border border-gray-300 rounded-lg"
+          autocomplete="username"
+          required
+        />
+      </div>
 
-    <!-- Kitchen Login Form -->
-    <div class="mb-4 flex justify-center">
-      <form @submit.prevent="submitLogin" class="w-96">
-        <div class="mb-4">
-          <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-          <input
-            v-model="name"
-            type="text"
-            id="name"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-lg"
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-          <input
-            v-model="password"
-            type="password"
-            id="password"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-lg"
-            required
-          />
-        </div>
-        <div class="flex items-center justify-between">
-          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Login</button>
-        </div>
-      </form>
-    </div>
+      <!-- Password Field -->
+      <div class="mb-4">
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input
+          v-model="form.password"
+          type="password"
+          id="password"
+          class="mt-1 p-2 w-full border border-gray-300 rounded-lg"
+          :class="{ 'border-red-500': form.errors.password }"
+          autocomplete="current-password"
+          required
+        />
+        <span v-if="form.errors.password" class="text-red-500 text-sm">{{ form.errors.password }}</span>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex items-center justify-between">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Login</button>
+      </div>
+
+      <!-- General Errors -->
+      <div v-if="form.errors.username || form.errors.password" class="mt-4">
+        <span class="text-red-500 text-sm">Invalid username or password.</span>
+      </div>
+    </form>
   </AuthLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import { useForm } from '@inertiajs/vue3';
 
-const name = ref('');
-const password = ref('');
+const form = useForm({
+  username: '',
+  password: '',
+});
 
 const submitLogin = () => {
-  // Perform login action here
-  console.log('Login submitted', name.value, password.value);
-  // Example using Inertia.js to post data
-  router.post('/login/kitchen', { name: name.value, password: password.value });
+  form.post('/login/kitchen', {
+    onError: (errors) => {
+      console.log('Login failed:', errors);
+    },
+  });
 };
-
-onMounted(() => {
-  const { props } = usePage();
-  props.title = 'Kitchen Login';
-});
 </script>
-
-<style scoped>
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-</style>
