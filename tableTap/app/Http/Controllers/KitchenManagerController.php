@@ -17,31 +17,38 @@ class KitchenManagerController extends Controller
     public function index()
     {
         $kitchenUser = Auth::guard('kitchen')->user();
-    
+
         if (!$kitchenUser) {
             return redirect()->route('login.kitchen')->withErrors(['error' => 'Unauthorized access.']);
         }
-    
-        $shopIds = $kitchenUser->shops->pluck('id');
-    
-        // Fetch products related to the kitchen's shop
-        $products = Product::whereIn('id', function ($query) use ($shopIds) {
+
+        // Fetch the associated shop using the updated shopRelation method
+        $shop = $kitchenUser->shopRelation;
+
+        if (!$shop) {
+            return redirect()->route('login.kitchen')->withErrors(['error' => 'No shop associated with this kitchen user.']);
+        }
+
+        $shopId = $shop->id;
+
+        // Fetch products related to the shop
+        $products = Product::whereIn('id', function ($query) use ($shopId) {
             $query->select('product_id')
-                  ->from('shop_product')
-                  ->whereIn('shop_id', $shopIds);
+                ->from('shop_product')
+                ->where('shop_id', $shopId);
         })->get();
-    
-        // Fetch only pending orders
+
+        // Fetch only pending orders related to the shop
         $orders = Order::where('status', 'pending')
-            ->whereHas('customer.table', function ($query) use ($shopIds) {
-                $query->whereHas('shop', function ($shopQuery) use ($shopIds) {
-                    $shopQuery->whereIn('shops.id', $shopIds);
+            ->whereHas('customer.table', function ($query) use ($shopId) {
+                $query->whereHas('shop', function ($shopQuery) use ($shopId) {
+                    $shopQuery->where('shops.id', $shopId);
                 });
             })
             ->with(['orderItems.product', 'customer'])
             ->get();
-    
-        // Return the Inertia view with only pending orders
+
+        // Return the Inertia view with products and pending orders
         return Inertia::render('Kitchen/Dashboard', [
             'products' => $products,
             'orders'   => $orders,
@@ -49,65 +56,73 @@ class KitchenManagerController extends Controller
     }
     
     /**
-     * Optional helper if you want a dedicated route to refetch pending orders only:
+     * Reload pending orders.
      */
     public function reloadOrders()
     {
         $kitchenUser = Auth::guard('kitchen')->user();
-    
+
         if (!$kitchenUser) {
             return response()->json(['error' => 'Unauthorized access.'], 403);
         }
-    
-        $shopIds = $kitchenUser->shops->pluck('id');
-    
+
+        $shop = $kitchenUser->shopRelation;
+
+        if (!$shop) {
+            return response()->json(['error' => 'No shop associated with this kitchen user.'], 403);
+        }
+
+        $shopId = $shop->id;
+
         $orders = Order::where('status', 'pending')
-            ->whereHas('customer.table', function ($query) use ($shopIds) {
-                $query->whereHas('shop', function ($shopQuery) use ($shopIds) {
-                    $shopQuery->whereIn('shops.id', $shopIds);
+            ->whereHas('customer.table', function ($query) use ($shopId) {
+                $query->whereHas('shop', function ($shopQuery) use ($shopId) {
+                    $shopQuery->where('shops.id', $shopId);
                 });
             })
             ->with(['orderItems.product', 'customer'])
             ->get();
-    
-        // Return JSON for a partial reload
-        return response()->json([
-            'orders' => $orders,
-        ]);
+
+        return response()->json(['orders' => $orders]);
     }
 
-public function getOrdersWithItems()
-{
-    $kitchenUser = Auth::guard('kitchen')->user();
+ /**
+     * Get orders with items.
+     */
+    public function getOrdersWithItems()
+    {
+        $kitchenUser = Auth::guard('kitchen')->user();
 
-    if (!$kitchenUser) {
-        return response()->json(['error' => 'Unauthorized access.'], 403);
+        if (!$kitchenUser) {
+            return response()->json(['error' => 'Unauthorized access.'], 403);
+        }
+
+        $shop = $kitchenUser->shopRelation;
+
+        if (!$shop) {
+            return response()->json(['error' => 'No shop associated with this kitchen user.'], 403);
+        }
+
+        $shopId = $shop->id;
+
+        $productIds = DB::table('shop_product')
+            ->where('shop_id', $shopId)
+            ->pluck('product_id');
+
+        $orderItemIds = DB::table('order_items')
+            ->whereIn('product_id', $productIds)
+            ->pluck('id');
+
+        $orders = Order::whereIn('id', function ($query) use ($orderItemIds) {
+            $query->select('order_id')
+                ->from('order_items')
+                ->whereIn('id', $orderItemIds);
+        })
+            ->with(['customer', 'orderItems.product'])
+            ->get();
+
+        return response()->json($orders);
     }
-
-    // Step 1: Find the shop IDs the kitchen user is associated with
-    $shopIds = $kitchenUser->shops->pluck('id');
-
-    // Step 2: Get all product IDs from shop_product for these shop IDs
-    $productIds = DB::table('shop_product')
-        ->whereIn('shop_id', $shopIds)
-        ->pluck('product_id');
-
-    // Step 3: Get all order item IDs where product_id matches
-    $orderItemIds = DB::table('order_items')
-        ->whereIn('product_id', $productIds)
-        ->pluck('id');
-
-    // Step 4: Get all orders that match the retrieved order item IDs
-    $orders = Order::whereIn('id', function ($query) use ($orderItemIds) {
-        $query->select('order_id')
-            ->from('order_items')
-            ->whereIn('id', $orderItemIds);
-    })
-        ->with(['customer', 'orderItems.product'])
-        ->get();
-
-    return response()->json($orders);
-}
 
     /**
      * Update product details (quantity or availability).
@@ -118,40 +133,62 @@ public function getOrdersWithItems()
             'quantity' => 'nullable|integer|min:0',
             'availability' => 'nullable|boolean',
         ]);
-    
+
         $kitchenUser = Auth::guard('kitchen')->user();
-        $shopIds = $kitchenUser->shops->pluck('id');
-    
-        // Validate product association with the shop
+
+        if (!$kitchenUser) {
+            return back()->withErrors(['error' => 'Unauthorized access.']);
+        }
+
+        $shop = $kitchenUser->shopRelation;
+
+        if (!$shop) {
+            return back()->withErrors(['error' => 'No shop associated with this kitchen user.']);
+        }
+
+        $shopId = $shop->id;
+
         $isProductAssociated = Product::where('id', $id)
-            ->whereIn('id', function ($query) use ($shopIds) {
+            ->whereIn('id', function ($query) use ($shopId) {
                 $query->select('product_id')
                     ->from('shop_product')
-                    ->whereIn('shop_id', $shopIds);
+                    ->where('shop_id', $shopId);
             })
             ->exists();
-    
+
         if (!$isProductAssociated) {
-            return back()->with('error', 'Unauthorized action.');
+            return back()->withErrors(['error' => 'Unauthorized action.']);
         }
-    
+
         $product = Product::findOrFail($id);
         $product->update($validated);
-    
+
         return back()->with('success', 'Product updated successfully.');
     }
+
     /**
      * Mark an order as ready.
      */
     public function markOrderAsReady($id)
     {
         $kitchenUser = Auth::guard('kitchen')->user();
-        $shopIds = $kitchenUser->shops->pluck('id');
+
+        if (!$kitchenUser) {
+            return back()->withErrors(['error' => 'Unauthorized access.']);
+        }
+
+        $shop = $kitchenUser->shopRelation;
+
+        if (!$shop) {
+            return back()->withErrors(['error' => 'No shop associated with this kitchen user.']);
+        }
+
+        $shopId = $shop->id;
 
         $isOrderAssociated = Order::where('id', $id)
-            ->whereHas('customer.table', function ($query) use ($shopIds) {
-                $query->whereHas('shop', function ($shopQuery) use ($shopIds) {
-                    $shopQuery->whereIn('shops.id', $shopIds);
+            ->whereHas('customer.table', function ($query) use ($shopId) {
+                $query->whereHas('shop', function ($shopQuery) use ($shopId) {
+                    $shopQuery->where('shops.id', $shopId);
                 });
             })
             ->exists();
@@ -165,6 +202,5 @@ public function getOrdersWithItems()
 
         return back()->with('success', 'Order marked as ready.');
     }
-
    
 }

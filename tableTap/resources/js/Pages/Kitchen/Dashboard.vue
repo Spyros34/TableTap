@@ -1,11 +1,25 @@
 <template>
   <div class="container mx-auto px-4 py-8 space-y-6">
+    <!-- Header Section -->
+    <h2 class="text-xl font-semibold mb-4 text-center sm:text-left flex justify-between items-center">
+      <span>Kitchen Dashboard</span>
+      <button
+        class="bg-gray2 hover:bg-gray-900 text-white px-4 py-2 rounded-3xl text-sm"
+        @click="logout"
+      >
+        Logout
+      </button>
+    </h2>
+
     <!-- Products Section -->
     <div>
       <h2 class="text-xl font-semibold mb-4 text-center sm:text-left">Products</h2>
-      <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-6">
+      <div v-if="localProducts.length === 0" class="text-center text-gray-500">
+        No products available.
+      </div>
+      <div v-else class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-6">
         <div
-          v-for="product in products"
+          v-for="product in localProducts"
           :key="product.id"
           class="bg-white p-4 rounded-lg shadow flex flex-col space-y-4"
         >
@@ -44,7 +58,10 @@
     <!-- Orders Section -->
     <div>
       <h2 class="text-xl font-semibold mb-4 text-center sm:text-left">Orders</h2>
-      <div class="grid lg:grid-cols-2 md:grid-cols-1 gap-6">
+      <div v-if="localOrders.length === 0" class="text-center text-gray-500">
+        No orders available.
+      </div>
+      <div v-else class="grid lg:grid-cols-2 md:grid-cols-1 gap-6">
         <div
           v-for="order in localOrders"
           :key="order.id"
@@ -117,6 +134,19 @@ const props = defineProps({
 // Create local reactive copies so we can mutate them (e.g. mark as ready)
 const localOrders  = ref([...props.orders])
 const localProducts = ref([...props.products])
+
+
+const logout = () => {
+    router.post('/logout', {}, {
+        onSuccess: () => {
+        console.log('Logged out successfully.');
+        },
+        onError: (err) => {
+        console.error('Failed to logout:', err);
+        }
+    })
+    };
+
 
 /**
  * Mark an order as "ready" locally and persist via the backend

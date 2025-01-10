@@ -14,12 +14,22 @@ class KitchenController extends Controller
 {
     public function index()
     {
-        // Fetch all kitchens from the database
-        $kitchens = Kitchen::all();
+        // Retrieve the authenticated user
+        $user = Auth::user();
+
+        // Get the first shop associated with the user
+        $shop = $user->shops()->first();
+
+        if (!$shop) {
+            return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
+        }
+
+        // Get kitchens associated with the shop
+        $kitchens = $shop->kitchens;
 
         // Pass the kitchens to the Inertia view
         return Inertia::render('Owner/Kitchen', [
-            'kitchenItems' => $kitchens
+            'kitchenItems' => $kitchens,
         ]);
     }
     /**
@@ -36,33 +46,36 @@ class KitchenController extends Controller
 
      public function store(Request $request)
 {
-    // Validate the input data 
-    $validatedData = $request->validate([
-        'name' => ['required', 'string', 'max:255', 'unique:kitchens,name'],
-        'password' => ['required', 'string', 'confirmed', 'min:8'],
-    ]);
-
-    // Retrieve the current shop based on the authenticated user
     $user = Auth::user();
-    $shop = $user->shops()->first(); // Adjust as needed if a user has multiple shops
+    $shop = $user->shops()->first();
 
     if (!$shop) {
         return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
     }
 
-    // Create the new kitchen
+    $validatedData = $request->validate([
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            function ($attribute, $value, $fail) use ($shop) {
+                if (Kitchen::where('name', $value)->where('shop_id', $shop->id)->exists()) {
+                    $fail("The $attribute has already been taken for this shop.");
+                }
+            },
+        ],
+        'password' => ['required', 'string', 'confirmed', 'min:8'],
+    ]);
+
     $kitchen = Kitchen::create([
         'name' => $validatedData['name'],
         'password' => Hash::make($validatedData['password']),
+        'shop_id' => $shop->id,
     ]);
 
-    // Associate the new kitchen with the user's shop and add created_at timestamp
-    $shop->kitchens()->attach($kitchen->id, ['created_at' => now()]);
-
-    // Return a JSON response to Inertia
     return Redirect::back()->with([
         'flash' => ['success' => 'Kitchen created successfully.'],
-        'newKitchen' => $kitchen,
+        'kitchenItem' => $kitchen, // Include the created kitchen in the response
     ]);
 }
 
@@ -117,13 +130,10 @@ class KitchenController extends Controller
     {
         $kitchen = Kitchen::findOrFail($id);
     
-        // Detach the kitchen from all associated shops
-        $kitchen->shops()->detach();
-    
-        // Delete the kitchen
+        // Delete the kitchen directly
         $kitchen->delete();
     
-        // Redirect back to the kitchen index with a flash success message
+        // Redirect back to the kitchen index with a success message
         return back()->with('flash', ['success' => 'Kitchen deleted successfully.']);
     }
     

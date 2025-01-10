@@ -17,6 +17,10 @@ return [
             'driver' => 'session',
             'provider' => 'kitchens',
         ],
+        'waiter' => [
+        'driver' => 'session',
+        'provider' => 'waiters',
+        ],
     ],
 
     'providers' => [
@@ -29,6 +33,10 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Kitchen::class,
         ],
+        'waiters' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Waiter::class,
+        ],
     ],
 
     'passwords' => [
@@ -40,6 +48,12 @@ return [
         ],
         'kitchens' => [
             'provider' => 'kitchens',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'wiaters' => [
+            'provider' => 'waiters',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,

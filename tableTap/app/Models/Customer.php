@@ -19,4 +19,11 @@ class Customer extends Model
                     ->withPivot('customer_id', 'table_id')
                     ->using(\Illuminate\Database\Eloquent\Relations\Pivot::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    
 }

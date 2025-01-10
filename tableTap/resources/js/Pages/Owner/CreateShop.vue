@@ -110,7 +110,7 @@ const form = useForm({
 const submitShop = () => {
   form.post('/create-shop', {
     onError: (errors) => {
-      console.log(errors);
+      console.log('Validation errors:', errors);
     },
   });
 };

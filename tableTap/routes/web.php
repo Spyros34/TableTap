@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\WaiterManagerController;
 use App\Http\Controllers\KitchenManagerController;
 use App\Http\Middleware\EnsureUserIsAuthenticated;
 
@@ -37,11 +38,14 @@ Route::get('/login/kitchen', function () {
 })->name('login.kitchen')->middleware('guest');
 Route::get('/kitchen/dashboard', [KitchenManagerController::class, 'index'])->middleware('auth')->name('kitchen.dashboard');
 Route::get('/login/waiter', function () {
+    // Return a Waiter Login Inertia page or a Blade view
     return Inertia::render('LoginPages/LoginWaiter');
-})->name('login.waiter')->middleware(RedirectIfAuthenticated::class);
+})->name('login.waiter')->middleware('guest');
 
-Route::post('/login/waiter', [LoginController::class, 'loginWaiter'])->middleware(RedirectIfAuthenticated::class);
+Route::get('/shops', [ShopController::class, 'list']);
 
+Route::post('/login/waiter', [LoginController::class, 'loginWaiter'])
+    ->middleware('guest');
 Route::get('/register', function () {
     return Inertia::render('RegisterPages/RegisterOwner');
 })->name('register.owner')->middleware(RedirectIfAuthenticated::class);
@@ -52,9 +56,7 @@ Route::get('/scan', [TableController::class, 'scan'])->name('table.scan');
 
 // Protected routes that require authentication
 Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Owner/Dashboard');
-    })->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen');
     Route::post('/kitchens', [KitchenController::class, 'store'])->name('kitchen.store');
     Route::put('/kitchens/{id}', [KitchenController::class, 'update'])->name('kitchen.update');
@@ -71,6 +73,22 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     Route::put('/waiters/{id}', [WaiterController::class, 'update'])->name('waiter.update');
     Route::delete('/waiter/{id}', [WaiterController::class, 'destroy'])->name('waiter.destroy');
    
+    // Waiter Manager Routes
+   // Waiter manager routes (only accessible if user is authenticated)
+   Route::middleware(['auth:waiter'])->group(function () {
+    Route::get('/waiter/dashboard', [WaiterManagerController::class, 'index'])->name('waiter.dashboard');
+   // Mark a 'ready' order as 'completed'
+   Route::post('/waiter/orders/{id}/completed', [WaiterManagerController::class, 'markOrderAsCompleted'])
+   ->name('waiter.markOrderAsCompleted');
+
+    // Clear completed orders
+    Route::post('/waiter/orders/clear-completed', [WaiterManagerController::class, 'clearCompletedOrders'])
+   ->name('waiter.clearCompletedOrders');
+    });
+
+    
+    
+
     Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductsController::class, 'store'])->name('products.store');
     Route::put('/products/{id}', [ProductsController::class, 'update'])->name('products.update');

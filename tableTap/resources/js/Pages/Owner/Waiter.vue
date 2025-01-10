@@ -236,11 +236,20 @@ const prevPage = () => {
 const createWaiter = () => {
   form.clearErrors();
   form.post('/waiter', {
-    onSuccess: (page) => {
-      const newWaiter = page.props.waiterItems[page.props.waiterItems.length - 1];
-      if (newWaiter && newWaiter.name ) {
-        waiterItems.value.push(newWaiter);
-        toastr.success('Waiter created successfully.');
+    onSuccess: () => {
+      const newWaiter = form.data(); // Extract the form data for the newly created waiter
+      if (newWaiter && newWaiter.username) {
+        // Add the new waiter to the list to prevent duplication
+        const isDuplicate = waiterItems.value.some(item => item.username === newWaiter.username);
+        if (!isDuplicate) {
+          waiterItems.value.push({
+            id: Math.random(), // Temporary ID until the backend refresh
+            ...newWaiter,
+          });
+          toastr.success('Waiter created successfully.');
+        } else {
+          toastr.error('Waiter already exists in the list.');
+        }
       } else {
         toastr.error('Failed to retrieve the created waiter data.');
       }

@@ -15,21 +15,21 @@ class WaiterController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        // Fetch all waiters associated with the authenticated user's shop
-        $user = Auth::user();
-        $shop = $user->shops()->first(); // Adjust if a user has multiple shops
+{
+    $user = Auth::user();
+    $shop = $user->shops()->first(); // Adjust if a user has multiple shops
 
-        if (!$shop) {
-            return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
-        }
-
-        $waiters = $shop->waiters;
-
-        return Inertia::render('Owner/Waiter', [
-            'waiterItems' => $waiters,
-        ]);
+    if (!$shop) {
+        return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
     }
+
+    // Fetch waiters for this shop only
+    $waiters = $shop->waiters()->distinct()->get(); // Use distinct() to ensure no duplicates
+
+    return Inertia::render('Owner/Waiter', [
+        'waiterItems' => $waiters,
+    ]);
+}
 
     /**
      * Store a newly created resource in storage.
@@ -60,6 +60,27 @@ class WaiterController extends Controller
 
         // Attach waiter to shop
         $shop->waiters()->attach($waiter->id, ['created_at' => now()]);
+
+        // 2) Attach Waiter to this Shop
+    $shop->waiters()->attach($waiter->id, ['created_at' => now()]);
+
+    // 3) Gather all Order IDs the same way the Kitchen does
+    //    a) We'll "mimic" the Kitchen approach: 
+    //       ->whereHas('customer.table', fn($q) => $q->whereHas('shop', fn($sq) => ...))
+    //    b) We'll only get orders from *this one* shop, or all the shops the Owner has if you prefer.
+    $shopId = $shop->id;  // Single shop ID
+
+    $orderIds = \App\Models\Order::whereHas('customer.table', function ($query) use ($shopId) {
+            // We only want orders where the associated table's shop.id = $shopId
+            $query->whereHas('shop', function ($shopQuery) use ($shopId) {
+                $shopQuery->where('shops.id', $shopId);
+            });
+        })
+        ->pluck('id'); // get all the matching orders' IDs
+
+    // 4) Attach these Orders to the Waiter in the 'waiter_order' pivot
+    $waiter->orders()->syncWithoutDetaching($orderIds);
+
 
         return Redirect::back()->with([
             'flash' => ['success' => 'Waiter created successfully.'],

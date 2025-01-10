@@ -78,15 +78,37 @@ class ProductsController extends Controller
     {
         // Find the product by ID
         $product = Product::findOrFail($id);
-
+    
+        // Get the authenticated user and their shop
+        $user = Auth::user();
+        $shop = $user->shops()->first();
+    
+        if (!$shop) {
+            return Redirect::back()->withErrors(['error' => 'No shop associated with this user.']);
+        }
+    
         // Validate the request data
         $validatedData = $request->validate([
-            'name'         => 'nullable|string|max:255|unique:products,name,' . $id,
+            'name' => [
+                'nullable',
+                'string',
+                'max:255',
+                // Ensure unique names only within the current shop
+                function ($attribute, $value, $fail) use ($shop, $product) {
+                    $existingProduct = $shop->products()
+                        ->where('name', $value)
+                        ->where('products.id', '!=', $product->id) // Specify table name
+                        ->first();
+                    if ($existingProduct) {
+                        $fail('The product name already exists in your shop.');
+                    }
+                },
+            ],
             'price'        => 'nullable|numeric|min:0',
             'quantity'     => 'nullable|integer|min:0',
             'availability' => 'nullable|boolean',
         ]);
-
+    
         // Update product fields if provided
         if ($request->filled('name')) {
             $product->name = $validatedData['name'];
@@ -100,10 +122,10 @@ class ProductsController extends Controller
         if ($request->filled('availability')) {
             $product->availability = $validatedData['availability'];
         }
-
+    
         // Save the changes
         $product->save();
-
+    
         // Return back with flash message
         return Redirect::back()->with('flash', ['success' => 'Product updated successfully.']);
     }
@@ -113,12 +135,16 @@ class ProductsController extends Controller
      */
     public function destroy(string $id)
     {
+        // Find the product by ID
         $product = Product::findOrFail($id);
-
-        $product->shop()->detach();
-
+    
+        // Detach the product from all associated shops
+        $product->shops()->detach(); // Use 'shops()' instead of 'shop()'
+    
+        // Delete the product
         $product->delete();
-
+    
+        // Return back with a success message
         return Redirect::back()->with('flash', [
             'success' => 'Product deleted successfully.',
         ]);

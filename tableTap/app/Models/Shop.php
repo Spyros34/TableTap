@@ -17,7 +17,7 @@ class Shop extends Model
 
     public function kitchens()
     {
-        return $this->belongsToMany(Kitchen::class, 'shop_kitchen');
+        return $this->hasMany(Kitchen::class, 'shop_id');
     }
 
     public function tables()
@@ -38,9 +38,14 @@ class Shop extends Model
                     ->withTimestamps();
     }
 
-    public function orders()
+    public function getOrdersAttribute()
     {
-        return $this->hasManyThrough(Order::class, Table::class, 'shop_id', 'table_id', 'id', 'id');
+        // 1) Gather all tables for this shop
+        // 2) Flatten each table's orders
+        // 3) Remove duplicates by ID (in case any overlap)
+        return $this->tables
+            ->flatMap(fn($table) => $table->orders)
+            ->unique('id');
     }
 
 }

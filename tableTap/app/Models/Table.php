@@ -20,7 +20,7 @@ class Table extends Model
                     ->withTimestamps();
     }
 
-    public function customer()
+    public function customers()
     {
         return $this->belongsToMany(Customer::class, 'customer_table')
                     ->withPivot('customer_id', 'table_id')

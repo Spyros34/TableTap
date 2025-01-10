@@ -15,32 +15,43 @@ class ShopController extends Controller
     }
 
     public function store(Request $request)
+{
+    $request->validate([
+        'storeName' => ['required', 'string', 'max:255', 'unique:shops,brand'],
+        'storeType' => ['required', 'string', 'max:255'],
+        'address' => ['required', 'string', 'max:255'],
+        'region' => ['required', 'string', 'max:255'],
+        'city' => ['required', 'string', 'max:255'],
+        'postalCode' => ['required', 'string', 'max:20'],
+        'phone' => ['required', 'string', 'max:20'],
+    ]);
+
+    $shop = Shop::create([
+        'brand' => $request->storeName,
+        'type' => $request->storeType,
+        'address' => $request->address,
+        'region' => $request->region,
+        'city' => $request->city,
+        'tk' => $request->postalCode,
+        'phone_number' => $request->phone,
+        'owner_id' => Auth::id(),
+    ]);
+
+    $owner = Auth::user();
+    $owner->shops()->attach($shop->id);
+
+    return redirect()->route('dashboard')->with('success', 'Shop created successfully.');
+}
+
+    public function list()
     {
-        $request->validate([
-            'storeName' => ['required', 'string', 'max:255'],
-            'storeType' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
-            'region' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'postalCode' => ['required', 'string', 'max:20'],
-            'phone' => ['required', 'string', 'max:20'],
-        ]);
-
-        $shop = Shop::create([
-            'brand' => $request->storeName,
-            'type' => $request->storeType,
-            'address' => $request->address,
-            'region' => $request->region,
-            'city' => $request->city,
-            'tk' => $request->postalCode,
-            'phone_number' => $request->phone,
-            'owner_id' => Auth::id(),
-        ]);
-
-        $owner = Auth::user();
-        $owner->shops()->attach($shop->id);
-    
-        return redirect()->route('dashboard');
-
+        try {
+            $shops = Shop::all(['id', 'brand']); // Fetch 'brand' instead of 'name'
+            return response()->json(['shops' => $shops], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching shops: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch shops.'], 500);
+        }
     }
+
 }

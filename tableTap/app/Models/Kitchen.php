@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Kitchen extends Authenticatable
 {
-    protected $fillable = ['name', 'password'];
+    protected $fillable = ['name', 'password', 'shop_id'];
 
     /**
      * Define the many-to-many relationship with Shop.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function shops(): BelongsToMany
+     */   
+    public function shopRelation()
     {
-        return $this->belongsToMany(Shop::class, 'shop_kitchen');
+        return $this->belongsTo(Shop::class, 'shop_id');
     }
 }
