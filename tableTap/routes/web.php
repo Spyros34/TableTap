@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\WaiterManagerController;
 use App\Http\Controllers\KitchenManagerController;
 use App\Http\Middleware\EnsureUserIsAuthenticated;
+use App\Http\Controllers\Auth\CustomerAuthController;
 
 // Public routes
 Route::get('/user-selection', function () {
@@ -43,6 +44,12 @@ Route::get('/login/waiter', function () {
 })->name('login.waiter')->middleware('guest');
 
 Route::get('/shops', [ShopController::class, 'list']);
+
+Route::post('/customer/login', [CustomerAuthController::class, 'login']);
+Route::post('/customer/register', [CustomerAuthController::class, 'register']);
+Route::post('/qr-scan', [TableController::class, 'scan']);
+Route::post('/scan-qr', [TableController::class, 'scanQR'])->name('scan.qr');
+
 
 Route::post('/login/waiter', [LoginController::class, 'loginWaiter'])
     ->middleware('guest');

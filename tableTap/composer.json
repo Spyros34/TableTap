@@ -8,9 +8,11 @@
         "php": "^8.2",
         "endroid/qr-code": "^5.0",
         "inertiajs/inertia-laravel": "^1.0",
+        "khanamiryan/qrcode-detector-decoder": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "libern/qr-code-reader": "^1.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "tightenco/ziggy": "^2.0",
         "yoeunes/toastr": "^3.0"

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shop;
 use Inertia\Inertia;
 use App\Models\Table;
 use Illuminate\Http\Request;
+use Zxing\Qrcode\Decoder\Decoder;
+use Illuminate\Support\Facades\Log;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Auth;
 use Endroid\QrCode\Encoding\Encoding;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Endroid\QrCode\Builder\Builder; // Import the Builder
 use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
@@ -178,14 +182,87 @@ class TableController extends Controller
      */
     public function scan(Request $request)
     {
-        $tableId = $request->query('id');
-        $shopId = $request->query('shop_id');
-
-        // Placeholder logic; adjust according to your mobile app integration
+        $qrCodeData = $request->input('qr_code_data');
+    
+        // Decode QR Code data and find the shop and table
+        parse_str(parse_url($qrCodeData, PHP_URL_QUERY), $params);
+    
+        $tableId = $params['id'] ?? null;
+        $shopId = $params['shop_id'] ?? null;
+    
+        if (!$tableId || !$shopId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid QR Code data.',
+            ], 400);
+        }
+    
+        $shop = Shop::find($shopId);
+        $table = Table::find($tableId);
+    
+        if (!$shop || !$table) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Shop or Table not found.',
+            ], 404);
+        }
+    
         return response()->json([
-            'message' => 'QR code scanned successfully.',
-            'table_id' => $tableId,
-            'shop_id' => $shopId,
+            'status' => 'success',
+            'shop' => [
+                'name' => $shop->name,
+                'location' => $shop->location,
+                'phone' => $shop->phone,
+            ],
+        ]);
+    }
+
+    public function scanQR(Request $request)
+    {
+        $shopId = $request->input('shop_id');
+        $tableId = $request->input('table_id'); // Ensure this matches the Flutter app input.
+    
+        // Validate the input
+        if (empty($shopId) || empty($tableId)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Missing shop_id or table_id.',
+            ], 400);
+        }
+    
+        // Find the shop
+        $shop = Shop::find($shopId);
+        if (!$shop) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Shop not found.',
+            ], 404);
+        }
+    
+        // Find the table by ID using the shop_table_association pivot table
+        $table = Table::where('id', $tableId)
+            ->whereHas('shop', function ($query) use ($shopId) {
+                $query->where('shop_table_association.shop_id', $shopId);
+            })->first();
+    
+        if (!$table) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Table not found for the specified shop.',
+            ], 404);
+        }
+    
+        // Return the shop and table details
+        return response()->json([
+            'status' => 'success',
+            'shop' => [
+                'name' => $shop->brand,
+                'location' => $shop->address,
+                'phone' => $shop->phone_number,
+            ],
+            'table' => [
+                'table_num' => $table->table_num,
+            ],
         ]);
     }
 }
