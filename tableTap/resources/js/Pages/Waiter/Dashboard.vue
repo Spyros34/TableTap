@@ -33,9 +33,20 @@
                   : 'N/A'
               }}
             </p>
+
+            <p class="text-sm">
+              Payment Method:
+              <span v-if="order.payment_method === 'Card'">
+                Card 
+              </span>
+              <span v-else>
+                {{ order.payment_method || 'N/A' }}
+              </span>
+            </p>
             <p :class="statusClass(order.status)" class="text-sm font-semibold">
               Status: {{ order.status }}
             </p>
+            
           </div>
           <div>
             <h3 class="text-sm font-medium mb-2">Order Items:</h3>

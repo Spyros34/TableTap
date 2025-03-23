@@ -8,6 +8,7 @@ use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\WaiterController;
 use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
@@ -49,6 +50,7 @@ Route::post('/customer/login', [CustomerAuthController::class, 'login']);
 Route::post('/customer/register', [CustomerAuthController::class, 'register']);
 Route::post('/qr-scan', [TableController::class, 'scan']);
 Route::post('/scan-qr', [TableController::class, 'scanQR'])->name('scan.qr');
+Route::post('/associate-customer-table', [CustomerController::class, 'associateCustomerTable']);
 
 
 Route::post('/login/waiter', [LoginController::class, 'loginWaiter'])
@@ -60,6 +62,10 @@ Route::get('/register', function () {
 Route::post('/register', [RegisterController::class, 'register'])->middleware(RedirectIfAuthenticated::class);
 // Route to handle scanning of the QR code (accessible without authentication if needed)
 Route::get('/scan', [TableController::class, 'scan'])->name('table.scan');
+Route::post('/get-products', [ProductsController::class, 'getProducts']);
+
+Route::post('/get-credit-cards', [CustomerController::class, 'getCreditCards']);
+Route::post('/place-order', [CustomerController::class, 'placeOrder']);
 
 // Protected routes that require authentication
 Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {

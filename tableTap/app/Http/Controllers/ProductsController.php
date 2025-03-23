@@ -130,6 +130,43 @@ class ProductsController extends Controller
         return Redirect::back()->with('flash', ['success' => 'Product updated successfully.']);
     }
 
+    public function getProducts(Request $request)
+{
+    $shopId = $request->input('shop_id');
+
+    if (!$shopId) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Missing shop_id.',
+        ], 400);
+    }
+
+    $shop = Shop::find($shopId);
+
+    if (!$shop) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Shop not found.',
+        ], 404);
+    }
+
+    // Explicitly specify the table name for the `id` field to avoid ambiguity
+    $products = $shop->products()
+        ->select([
+            'products.id as product_id', // Specify `products.id` and alias it
+            'products.name',
+            'products.price',
+            'products.quantity',
+            'products.availability',
+            'products.description'
+        ])
+        ->get();
+
+    return response()->json([
+        'status' => 'success',
+        'products' => $products,
+    ]);
+}
     /**
      * Remove the specified resource from storage.
      */

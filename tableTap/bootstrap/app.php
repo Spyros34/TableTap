@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'customer/*',
             '/scan-qr',
+            '/get-products',
+            '/get-credit-cards',
+            '/place-order',
+            '/associate-customer-table'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
