@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Customer;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
@@ -21,12 +22,16 @@ class CustomerController extends Controller
 
     try {
         // Attach the customer to the table
-        DB::table('customer_table')->insertOrIgnore([
-            'customer_id' => $validated['customer_id'],
-            'table_id'    => $validated['table_id'],
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
+        DB::table('customer_table')->updateOrInsert(
+            [
+                'customer_id' => $validated['customer_id'],
+                'table_id'    => $validated['table_id'],
+            ],
+            [
+                'created_at' => now(), // Only used if it's a new record
+                'updated_at' => now(),
+            ]
+        );
 
         return response()->json([
             'status'  => 'success',
@@ -95,6 +100,13 @@ class CustomerController extends Controller
                         'product_id' => $item['product_id'],
                         'amount'     => $item['quantity'],
                     ]);
+                }
+
+                 // Subtract the ordered quantity from the product's available quantity
+                $product = Product::find($item['product_id']);
+                if ($product) {
+                    $newQuantity = $product->quantity - $item['quantity'];
+                        $product->update(['quantity' => $newQuantity]);
                 }
     
                 // Get all waiters assigned to the shop

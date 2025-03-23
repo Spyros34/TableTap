@@ -65,6 +65,17 @@ class WaiterManagerController extends Controller
         // Update the order status to 'completed' in the DB
         $order->update(['status' => 'completed']);
 
+         // Check if the customer has any other orders that are not completed
+        $pendingOrdersCount = Order::where('customer_id', $order->customer_id)
+        ->where('status', '!=', 'completed')
+        ->count();
+
+        // Only detach the customer's table if this was their last pending order
+        if ($pendingOrdersCount === 0) {
+           
+            $order->customer->table()->detach();
+        }
+
         return back()->with('success', 'Order marked as completed.');
     }
 }
