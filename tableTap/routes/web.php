@@ -51,7 +51,7 @@ Route::post('/customer/register', [CustomerAuthController::class, 'register']);
 Route::post('/qr-scan', [TableController::class, 'scan']);
 Route::post('/scan-qr', [TableController::class, 'scanQR'])->name('scan.qr');
 Route::post('/associate-customer-table', [CustomerController::class, 'associateCustomerTable']);
-
+Route::get('/get-shops', [ShopController::class, 'getShops']);
 
 Route::post('/login/waiter', [LoginController::class, 'loginWaiter'])
     ->middleware('guest');
@@ -66,6 +66,13 @@ Route::post('/get-products', [ProductsController::class, 'getProducts']);
 
 Route::post('/get-credit-cards', [CustomerController::class, 'getCreditCards']);
 Route::post('/place-order', [CustomerController::class, 'placeOrder']);
+Route::post('/change-password', [CustomerController::class, 'changePassword']);
+
+Route::post('/get-profile', [CustomerController::class, 'getProfile']);
+Route::post('/update-profile', [CustomerController::class, 'updateProfile']);
+Route::post('/get-credit-cards', [CustomerController::class, 'getCreditCards']);
+Route::post('/add-card', [CustomerController::class, 'addCard']);
+Route::post('/delete-card', [CustomerController::class, 'deleteCard']);
 
 // Protected routes that require authentication
 Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {

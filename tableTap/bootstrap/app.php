@@ -23,7 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
             '/get-products',
             '/get-credit-cards',
             '/place-order',
-            '/associate-customer-table'
+            '/associate-customer-table',
+            '/get-shops',
+            '/get-profile',
+            '/update-profile',
+            '/get-credit-cards',
+            '/add-card',
+            '/delete-card',
+            '/change-password',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -54,4 +54,23 @@ class ShopController extends Controller
         }
     }
 
+    public function getShops(Request $request)
+    {
+        try {
+            // Eager-load products for each shop
+            $shops = Shop::with('products')->get();
+
+            return response()->json([
+                'status' => 'success',
+                'shops'  => $shops,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to fetch shops.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
