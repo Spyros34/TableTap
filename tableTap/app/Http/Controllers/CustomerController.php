@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
@@ -289,6 +290,55 @@ public function updateProfile(Request $request)
         return response()->json([
             'status'  => 'error',
             'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function forgotPassword(Request $request)
+{
+    try {
+        // Validate the email input
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        // Find the customer by email
+        $customer = Customer::where('email', $validated['email'])->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'No user found with that email address.',
+            ], 404);
+        }
+
+        // Generate a new temporary password (8 characters long)
+        $temporaryPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8);
+
+        // Update the customer's password with the temporary password (hashed)
+        $customer->password = Hash::make($temporaryPassword);
+        $customer->save();
+
+        // Send the temporary password via email
+        Mail::raw("Your temporary password is: $temporaryPassword", function($message) use ($customer) {
+            $message->to($customer->email)
+                    ->subject('Your Temporary Password');
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'A temporary password has been sent to your email address.',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Validation failed.',
+            'errors'  => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'An error occurred: ' . $e->getMessage(),
         ], 500);
     }
 }

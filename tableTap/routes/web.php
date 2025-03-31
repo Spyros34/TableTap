@@ -67,6 +67,7 @@ Route::post('/get-products', [ProductsController::class, 'getProducts']);
 Route::post('/get-credit-cards', [CustomerController::class, 'getCreditCards']);
 Route::post('/place-order', [CustomerController::class, 'placeOrder']);
 Route::post('/change-password', [CustomerController::class, 'changePassword']);
+Route::post('/forgot-password', [CustomerController::class, 'forgotPassword']);
 
 Route::post('/get-profile', [CustomerController::class, 'getProfile']);
 Route::post('/update-profile', [CustomerController::class, 'updateProfile']);

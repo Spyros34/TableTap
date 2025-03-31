@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '/add-card',
             '/delete-card',
             '/change-password',
+            '/forgot-password',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
