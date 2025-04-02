@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class Admin extends Authenticatable
 {
     use HasFactory;
 
@@ -13,9 +13,6 @@ class Admin extends Model
         'name', 'surname', 'username', 'email', 'password', 'remember_token'
     ];
 
-    public function system()
-    {
-        return $this->belongsToMany(System::class, 'system_admin', 'admin_id', 'system_id')->withTimestamps();
-    }
+  
 }
 

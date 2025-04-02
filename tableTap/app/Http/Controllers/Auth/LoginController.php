@@ -10,6 +10,26 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+
+    public function loginAdmin(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        // Attempt to log in with an extra check to ensure the user is an admin.
+        if (Auth::guard('admin')->attempt($credentials)) {
+            $request->session()->regenerate();
+            // Redirect to the admin dashboard 
+            return redirect()->route('admin.dashboard')->with('success', 'Login successful.');
+        }
+
+        return back()->withErrors([
+            'username' => 'Invalid credentials or you are not authorized as an admin.',
+        ]);
+    }
+
     public function loginOwner(Request $request)
     {
         // Validate the credentials

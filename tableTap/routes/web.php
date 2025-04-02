@@ -3,6 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\WaiterController;
@@ -43,6 +44,30 @@ Route::get('/login/waiter', function () {
     // Return a Waiter Login Inertia page or a Blade view
     return Inertia::render('LoginPages/LoginWaiter');
 })->name('login.waiter')->middleware('guest');
+
+Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+Route::get('/admin/system-status', [AdminController::class, 'showSystemStatus'])
+->middleware('auth:admin')
+     ->name('admin.system_status.show');
+
+Route::post('/admin/system-status', [AdminController::class, 'updateSystemStatus'])
+->middleware('auth:admin')
+     ->name('admin.system_status.update');
+
+Route::get('/login/admin', function () {
+    // Renders your Inertia admin login page
+    return Inertia::render('LoginPages/LoginAdmin');
+})->name('login.admin')->middleware('guest');
+
+// Admin login submission (POST)
+Route::post('/login/admin', [LoginController::class, 'loginAdmin'])
+    ->middleware('guest');
+
+// Admin dashboard (protected by the admin guard)
+Route::get('/admin/dashboard', [AdminController::class, 'showSystemStatus'])
+    ->middleware('auth:admin')
+    ->name('admin.dashboard');
+
 
 Route::get('/shops', [ShopController::class, 'list']);
 
@@ -108,7 +133,7 @@ Route::middleware([EnsureUserIsAuthenticated::class])->group(function () {
     });
 
     
-    
+  
 
     Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductsController::class, 'store'])->name('products.store');
